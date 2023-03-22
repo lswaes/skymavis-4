@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-chart1
+  namespace: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: nginx-chart1
+  template:
+    metadata:
+      labels:
+        name: nginx-chart1
+    spec:
+      containers:
+        - name: {{ (index .Values.hosts 0).name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: [ "sh", "-c"]
+          args:
+          - while true; do
+              echo -en '\n';
+              printenv MY_CONTAINER_NAME
+              sleep 10;
+            done;
+          env:
+            - name: MY_CONTAINER_NAME
+              value: {{ (index .Values.hosts 0).name  | quote }}
+          ports:
+            - name: http
+              containerPort: 8080
