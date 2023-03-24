@@ -13,20 +13,17 @@ spec:
       labels:
         name: nginx-chart2
     spec:
+      volumes:
+        - name: html
+          configMap:
+            name: {{ (index .Values.hosts 1).name }}-cm
       containers:
         - name: {{ (index .Values.hosts 1).name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: [ "sh", "-c"]
-          args:
-          - while true; do
-              echo -en '\n';
-              printenv MY_CONTAINER_NAME1
-              sleep 10;
-            done;
-          env:
-            - name: MY_CONTAINER_NAME1
-              value: {{ (index .Values.hosts 1).name | quote }}
+          volumeMounts:
+            - name: html
+              mountPath: /usr/share/nginx/html/
           ports:
             - name: https
               containerPort: 4443
